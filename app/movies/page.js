@@ -1,17 +1,30 @@
 import Link from "next/link";
 import { getAllMovies } from "../../lib/contentful";
 
-// Link lets us go to another page without reloading the whole site
-// brings in the function from lib/contentful.js
+const genres = ["Action", "Comedy", "Drama", "Horror", "Sci-Fi"];
 
-export default async function MoviesPage() {
-  const movies = await getAllMovies();
+// the same 5 genres we locked in Contentful
 
-  // gets the movies from Contentful before the page shows
+export default async function MoviesPage({ searchParams }) {
+  const { genre } = await searchParams;
+  const movies = await getAllMovies(genre);
+
+  // searchParams is the part of the URL after the ?
+  // so /movies?genre=Horror gives us "Horror"
+  // if there's no genre in the URL, genre is empty and we get all movies
 
   return (
     <main>
       <h1>Movies</h1>
+
+      <nav>
+        <Link href="/movies">All</Link>
+        {genres.map((g) => (
+          <Link key={g} href={"/movies?genre=" + g}> {g} </Link>
+        ))}
+      </nav>
+
+      {/* one link for All, then one link for each genre */}
 
       {movies.map((movie) => (
         <div key={movie.slug}>
@@ -24,7 +37,4 @@ export default async function MoviesPage() {
       ))}
     </main>
   );
-
-  // .map goes through each movie and makes HTML for it
-  // the Link sends you to /movies/ plus that movie's slug, like /movies/inception
 }
